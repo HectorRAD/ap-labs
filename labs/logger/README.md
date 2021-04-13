@@ -1,3 +1,15 @@
+How to run the code
+=======================
+There is 2 ways to run the code, the first one is>
+- Run the commands:
+    - gcc -c testLogger.c -o testLogger.o
+    - gcc -c logger.c -o logger.o
+    - gcc testLogger.o logger.o -o main.o
+    - ./main.o
+
+The second option is:
+- Use 'make test'
+
 Lab - Logger Library
 ====================
 
