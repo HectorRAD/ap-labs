@@ -126,7 +126,7 @@ func remover(usuario, ban string) {
 func mensaje(origin, destino string, mensaje []string) {
 	//se verifica que el destinatario este presente
 	if _, ok := usuariosEnLinea[destino]; ok {
-		//se imprime el mensaje en la conexion del destinario y remitente
+		//se imprime el mensaje en la conexion de ambo usuarios
 		fmt.Fprintln(usuariosEnLinea[origin], Yellow+"(Le murmuras a "+destino+")> "+strings.Join(mensaje, " ")+Reset)
 		fmt.Fprintln(usuariosEnLinea[destino], Yellow+"("+origin+" te murmura)> "+strings.Join(mensaje, " ")+Reset)
 		return

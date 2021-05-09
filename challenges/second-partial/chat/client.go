@@ -21,7 +21,7 @@ func main() {
 	//Validacion de entrada de suficientes elementos
 	if len(os.Args) < 5 || len(os.Args) > 5 {
 		fmt.Println("\033[31mERROR: ENTRADA NO ACEPTADA. \033[0mSIGUE EL SIGUIENTE FORMATO:")
-		fmt.Println("\033[32mgo run client.go -user <nombre de usuario> -server localhost:<puerto> \033[0m")
+		fmt.Println("\033[32mgo run client.go -user <usuario> -server localhost:<puerto> \033[0m")
 		os.Exit(1)
 
 	}
@@ -29,7 +29,7 @@ func main() {
 	//Validacion de formato de entrada correcta
 	if os.Args[1] != "-user" || os.Args[3] != "-server" {
 		fmt.Println("\033[31mERROR: ENTRADA NO ACEPTADA. \033[0mSIGUE EL SIGUIENTE FORMATO:")
-		fmt.Println("\033[32mgo run client.go -user <nombre de usuario> -server localhost:<puerto> \033[0m")
+		fmt.Println("\033[32mgo run client.go -user <usuario> -server localhost:<puerto> \033[0m")
 		os.Exit(1)
 	}
 
