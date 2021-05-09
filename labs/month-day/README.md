@@ -9,7 +9,7 @@ Modify the provided `month_day.c` file to receive the parameters in the way and 
 ```
 # ./month_day <year> <yearday>
 # Example for Feb 2nd, 2019:
-./month_day 2019 33
+\$ ./month_day 2019 33
 Feb 02, 2019
 ```
 
@@ -39,6 +39,6 @@ make test
 How to submit your work
 =======================
 ```
-GITHUB_USER=<your_github_user>  make submit
+make submit
 ```
-More details at: [Classify API](../../classify.md)
+More details at: [Classify API](../../classify.md#submit-a-lab-to-classify)
