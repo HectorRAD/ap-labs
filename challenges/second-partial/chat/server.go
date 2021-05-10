@@ -40,6 +40,7 @@ var (
 
 	//booleano para manejar administrador
 	faltaAdmin = false
+	//kicked     = false
 
 	//Colored Outputs
 	Reset  = "\033[0m"
@@ -55,30 +56,30 @@ var (
 
 //funcion tiempo, para el comando /time
 func tiempo() string {
-	time := time.Now().Format(time.Kitchen) //Se obtiene el tiempo en formato de 12 horas
-	return Green + "SERVIDOR> Hora local en America/Mexico_City: " + strings.Trim(time, "\n") + Reset
+	time := time.Now().Format("15:04") //Se obtiene el tiempo en formato de 12 horas
+	return "irc-server > Local Time: America/Mexico_City " + strings.Trim(time, "\n")
 }
 
 //funcion usuarios, para el comando /users
 func usuarios() string {
 	out := ""
 
-	out += Purple + "SERVIDOR > Usuarios conectados: \n"
-	out += "#################################\n"
+	//out += Purple + "irc-server > Usuarios conectados: \n"
+	//out += "#################################\n"
 
 	//se recorre el mapa, agregando los usuarios al string de salida
 	for user, _ := range usuariosEnLinea {
-		out += user
+		out += "irc-server > " + user
 
 		//si el usuario es administrador, se muestra despues de su nombre
-		if user == adiministrador {
+		/*if user == adiministrador {
 			out += " (Administrador)"
-		}
+		}*/
 
-		out += " - conectado desde: " + tiemposDeCon[user].Format(time.ANSIC) + "\n"
+		out += " - connected since " + tiemposDeCon[user].Format("01-02-2006 15:04:05") + "\n"
 	}
 
-	out += "##################################" + Reset
+	//out += "##################################" + Reset
 
 	return out
 }
@@ -86,17 +87,17 @@ func usuarios() string {
 //funcion infoUaurio, para el comando /user
 func infoUsuario(usuario string) string {
 	out := ""
-	out += Blue + "#########################################\n"
+	//out += Blue + "#########################################\n"
 
 	//se valida que el usuario buscado este presente
 	if _, ok := usuariosEnLinea[usuario]; ok {
-		out += "Nombre de usuario: " + usuario + "\n"
-		out += "IP: " + usuariosEnLinea[usuario].RemoteAddr().String() + "\n"
-		out += "Conectado desde: " + tiemposDeCon[usuario].Format(time.ANSIC) + "\n"
-		out += "#########################################" + Reset
+		out += "irc-server > username: " + usuario
+		out += ", IP: " + usuariosEnLinea[usuario].RemoteAddr().String()
+		out += " Connected since: " + tiemposDeCon[usuario].Format(time.ANSIC)
+		//out += "#########################################" + Reset
 		return out
 	} else {
-		return "SERVIDOR > el usuario <" + usuario + "> no existe o no esta conectado" //si no se encuentra, se regresa un string que informa eso
+		return "irc-server > el usuario <" + usuario + "> no existe o no esta conectado" //si no se encuentra, se regresa un string que informa eso
 	}
 }
 
@@ -104,20 +105,20 @@ func infoUsuario(usuario string) string {
 func remover(usuario, ban string) {
 	//se verifica que el usuario que lo ejecute sea administrador
 	if strings.Compare(usuario, adiministrador) != 0 {
-		fmt.Fprintln(usuariosEnLinea[usuario], "SERVIDOR > Solo el administrador puede ejecutar este comando")
+		fmt.Fprintln(usuariosEnLinea[usuario], "irc-server > Solo el administrador puede ejecutar este comando")
 	} else {
 		//se busca el usuario en el mapa
 		if _, ok := usuariosEnLinea[ban]; ok {
-			fmt.Fprintln(usuariosEnLinea[ban], Red+"SERVIDOR > El administrador te ha sacado por comportamiento inadecuado."+Reset)                       //se informa al usuario que lo banearon
-			fmt.Println(Red + "SERVIDOR > El usuario [" + Cyan + ban + Red + "] ha sido removido" + Reset)                                                //se registra la accion en el server
-			messages <- Red + "El usuario [" + Cyan + ban + Red + "] ha sido removido del server. Recuerden mantener un comportamiento adecuado." + Reset //se informa a todos
-
+			fmt.Fprintln(usuariosEnLinea[ban], "irc-server > You're kicked from this channel") //se informa al usuario que lo banearon
+			fmt.Fprintln(usuariosEnLinea[ban], "irc-server > Bad language is not allowed on this channel")
+			fmt.Println("irc-server > [" + ban + "] was kicked")                                               //se registra la accion en el server
+			messages <- "irc-server > [" + ban + "] was kicked from channel for bad language policy violation" //se informa a todos
 			//se cierra su conexion y se borra de los mapas
 			usuariosEnLinea[ban].Close()
 			delete(usuariosEnLinea, ban)
 			delete(tiemposDeCon, ban)
 		} else {
-			fmt.Fprintln(usuariosEnLinea[usuario], "SERVIDOR > el usuario <"+ban+"> no existe o no esta conectado")
+			fmt.Fprintln(usuariosEnLinea[usuario], "irc-server > el usuario <"+ban+"> no existe o no esta conectado")
 		}
 	}
 }
@@ -127,11 +128,15 @@ func mensaje(origin, destino string, mensaje []string) {
 	//se verifica que el destinatario este presente
 	if _, ok := usuariosEnLinea[destino]; ok {
 		//se imprime el mensaje en la conexion de ambo usuarios
-		fmt.Fprintln(usuariosEnLinea[origin], Yellow+"(Le murmuras a "+destino+")> "+strings.Join(mensaje, " ")+Reset)
-		fmt.Fprintln(usuariosEnLinea[destino], Yellow+"("+origin+" te murmura)> "+strings.Join(mensaje, " ")+Reset)
+
+		//fmt.Fprintln(usuariosEnLinea[origin], Yellow+"(Le murmuras a "+destino+")> "+strings.Join(mensaje, " ")+Reset)
+		//fmt.Fprintln(usuariosEnLinea[destino], Yellow+"("+origin+" te murmura)> "+strings.Join(mensaje, " ")+Reset)
+
+		//fmt.Fprintln(usuariosEnLinea[origin], destino+" > "+strings.Join(mensaje, " "))
+		fmt.Fprintln(usuariosEnLinea[destino], origin+" > "+strings.Join(mensaje, " "))
 		return
 	} else {
-		fmt.Fprintln(usuariosEnLinea[origin], "SERVIDOR > el usuario <"+destino+"> no existe o no esta conectado")
+		fmt.Fprintln(usuariosEnLinea[origin], "irc-server > el usuario <"+destino+"> no existe o no esta conectado")
 	}
 }
 
@@ -198,23 +203,24 @@ func handleConn(conn net.Conn) {
 	tiemposDeCon[who] = time.Now().UTC()
 
 	//mensajes de bienvenida
-	fmt.Printf("SERVIDOR > Se ha unido el usuario [%s%s%s]\n", Cyan, who, Reset)
-	fmt.Fprintln(conn, "SERVIDOR > Bienvenido al Sevidor IRC simple")
-	fmt.Fprintln(conn, "SERVIDOR > Te has conectado a las: "+tiemposDeCon[who].Format(time.ANSIC))
-	fmt.Fprintln(conn, "SERVIDOR > Tu usuario ["+Cyan+who+Reset+"] ha sido registrado correctamente")
+	fmt.Printf("irc-server > New connected user [%s]\n", who)
+	fmt.Fprintln(conn, "irc-server > Welcome to the Simple IRC Server")
+	//fmt.Fprintln(conn, "irc-server > Te has conectado a las: "+tiemposDeCon[who].Format(time.ANSIC))
+	fmt.Fprintln(conn, "irc-server > Your user ["+who+"] is successfully logged")
 
 	//se asigna un administrador
 	if faltaAdmin {
 		adiministrador = who
-		fmt.Println("SERVIDOR > [" + Cyan + who + Reset + "] ahora es el administrador del server")
-		fmt.Fprintln(conn, "SERVIDOR > Ahora eres el administrador del servidor!")
+		fmt.Println("irc-server > [" + who + "] was promoted as the channel ADMIN")
+		fmt.Fprintln(conn, "irc-server > Congrats, you were the first user.")
+		fmt.Fprintln(conn, "irc-server > You're the new IRC Server ADMIN")
 		faltaAdmin = false
 	}
 
 	go clientWriter(conn, ch)
 
 	//se informa de la llegada de un nuevo usuario
-	messages <- "SERVIDOR > Nuevo usuario conectado [" + Cyan + who + Reset + "]"
+	messages <- "irc-server > New connected user[" + who + "]"
 	entering <- ch
 
 	input := bufio.NewScanner(conn)
@@ -233,7 +239,7 @@ func handleConn(conn net.Conn) {
 				case "/msg":
 					//validacion de formato correcto
 					if len(comando) < 3 {
-						ch <- "SERVIDOR > ARGUMENTOS INCORRECTOS, usa /msg <usuario> <mensaje>"
+						ch <- "irc-server > ARGUMENTOS INCORRECTOS, usa /msg <usuario> <mensaje>"
 						continue
 					}
 
@@ -242,7 +248,7 @@ func handleConn(conn net.Conn) {
 				case "/users":
 					//validacion de formato correcto
 					if len(comando) != 1 {
-						ch <- "SERVIDOR > Este comando no necesita argumentos, solo usa /users"
+						ch <- "irc-server > Este comando no necesita argumentos, solo usa /users"
 						continue
 					} else {
 						ch <- usuarios()
@@ -251,7 +257,7 @@ func handleConn(conn net.Conn) {
 				case "/kick":
 					//validacion de formato correcto
 					if len(comando) < 2 {
-						ch <- "SERVIDOR > ARGUMENTOS INCORRECTOS, usa /kick <usuario>"
+						ch <- "irc-server > ARGUMENTOS INCORRECTOS, usa /kick <usuario>"
 						continue
 					}
 
@@ -260,7 +266,7 @@ func handleConn(conn net.Conn) {
 				case "/time":
 					//validacion de formato correcto
 					if len(comando) != 1 {
-						ch <- "SERVIDOR > Este comando no necesita argumentos, solo usa /time"
+						ch <- "irc-server > Este comando no necesita argumentos, solo usa /time"
 						continue
 					} else {
 						ch <- tiempo()
@@ -269,14 +275,14 @@ func handleConn(conn net.Conn) {
 				case "/user":
 					//validacion de formato correcto
 					if len(comando) != 2 {
-						ch <- "SERVIDOR > ARGUMENTOS INCORRECTOS, usa /user <usuario>"
+						ch <- "irc-server > ARGUMENTOS INCORRECTOS, usa /user <usuario>"
 						continue
 					} else {
 						ch <- infoUsuario(comando[1])
 					}
 				default:
 					//si no se detecta un caso, se informa al usuario
-					ch <- "SERVIDOR > Comando no reconocido despues del caracter '/' "
+					ch <- "irc-server > Comando no reconocido despues del caracter '/' "
 				}
 
 			} else {
@@ -289,8 +295,9 @@ func handleConn(conn net.Conn) {
 	// NOTE: ignoring potential errors from input.Err()
 
 	//mensajes de salida de usuario
-	fmt.Println("SERVIDOR > [" + Cyan + who + Reset + "] se fue.")
-	messages <- "SERVIDOR > [" + Cyan + who + Reset + "] dejo el chat. See you, space cowboy."
+
+	fmt.Println("irc-server > [" + who + "] left")
+	messages <- "irc-server > [" + who + "] left channel."
 
 	//se elimina al usuario de los mapas
 	delete(usuariosEnLinea, who)
@@ -301,8 +308,8 @@ func handleConn(conn net.Conn) {
 	if who == adiministrador {
 		for user, _ := range usuariosEnLinea {
 			adiministrador = user
-			fmt.Println("SERVIDOR > [" + Cyan + user + Reset + "] ahora es el administrador")
-			messages <- "SERVIDOR > [" + Cyan + user + Reset + "] es el nuevo admin, el antiguo [" + Cyan + who + Reset + "], se desconecto."
+			fmt.Println("irc-server > [" + user + "] has been promoted to admin")
+			//messages <- "irc-server > [" + user + "] is the new admin, the old one [" + Cyan + who + Reset + "], left."
 			break
 		}
 	}
@@ -335,7 +342,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Println("SERVIDOR > Inicializando...")
+	//fmt.Println("irc-server > Inicializando...")
 
 	host := flag.String("host", "localhost", "address")
 	port := flag.String("port", os.Args[4], "listener")
@@ -349,8 +356,8 @@ func main() {
 
 	go broadcaster()
 
-	fmt.Println("SERVIDOR > Servidor IRC correctamente montado en " + *host + ":" + *port)
-	fmt.Println("SERVIDOR > Servidor inicializado. Listo para recibir clientes.")
+	fmt.Println("irc-server > Simple IRC Server started at " + *host + ":" + *port)
+	fmt.Println("irc-server > Ready for receiving new clients")
 
 	for {
 		conn, err := listener.Accept()
