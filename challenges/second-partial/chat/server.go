@@ -6,7 +6,7 @@
 
 // Chat is a server that lets clients chat with each other.
 
-//A01636166
+//Submission comment
 package main
 
 import (
